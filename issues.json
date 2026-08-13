@@ -1,0 +1,165 @@
+{
+  "_readme": "统一的期刊数据源。所有 pdf-flip-*.js 中硬编码的翻页跳转、所有 Volume*.html 里手写的 Title 按钮，本质都是这份数据。把它们改成从这里读取，24 个文件的维护量就降到 1 个 json。pdfUrl 字段请替换成实际 PDF 路径（原代码里 PDF 路径是通过 viewer-*.js 传入的，本仓库未包含，需要你按实际目录补上，例如 pdf/Volume13Issue1.pdf）。readerScript / viewerScript 对应原来 12 个几乎相同的 pdf-flip-*.js 和 viewer-*.js，整合后只需要 1 份 pdf-flip.js（见同目录 pdf-flip.js）。",
+  "issues": [
+    {
+      "id": "v13i1", "volume": 13, "issue": 1, "year": 2020,
+      "dateLabel": "Pages 1-128 (March 2020)",
+      "pdfUrl": "pdf/Volume13Issue1.pdf",
+      "articles": [
+        { "title": "Of stars and galaxies – Co-authorship network and research", "page": 6 },
+        { "title": "State-owned enterprises in China: A review of 40 years of research and practice", "page": 36 },
+        { "title": "Peer effect in the initial recognition of goodwill", "page": 62 },
+        { "title": "The effect of affiliated analysts on stock recommendations: Evidence from share pledges in China", "page": 84 },
+        { "title": "How audit effort affects audit quality: An audit process and audit output perspective", "page": 114 }
+      ]
+    },
+    {
+      "id": "v13i2", "volume": 13, "issue": 2, "year": 2020,
+      "dateLabel": "Pages 129-236 (June 2020)",
+      "pdfUrl": "pdf/Volume13Issue2.pdf",
+      "articles": [
+        { "title": "Tracing back to the source: Understanding the corporate governance of boards of directors in Chinese SOEs", "page": 6 },
+        { "title": "Does environmental labeling exacerbate heavily polluting firms' financial constraints? Evidence from China", "page": 24 },
+        { "title": "Independent technical directors and their effect on corporate innovation in China", "page": 52 },
+        { "title": "The impact of the Social Security Fund on auditor litigation risk", "page": 78 },
+        { "title": "Related party transactions and firm value: The moderating role of corporate social responsibility reporting", "page": 100 }
+      ]
+    },
+    {
+      "id": "v13i3", "volume": 13, "issue": 3, "year": 2020,
+      "dateLabel": "Pages 237-326 (September 2020)",
+      "pdfUrl": "pdf/Volume13Issue3.pdf",
+      "articles": [
+        { "title": "Fifty years of capital markets research in accounting: Achievements so far and opportunities ahead", "page": 6 },
+        { "title": "Economic sharing of honors: Equal or Exclusive?", "page": 20 },
+        { "title": "The potential harms of goodwill impairment avoidance: Evidence based on future performance and stock prices", "page": 40 },
+        { "title": "Business and financial information integration and voluntary management earnings forecasts", "page": 60 },
+        { "title": "Job satisfaction and firm leverage: Evidence from the \"China's Best Employer Award 100\" winners", "page": 78 }
+      ]
+    },
+    {
+      "id": "v13i4", "volume": 13, "issue": 4, "year": 2020,
+      "dateLabel": "Pages 327-424 (December 2020)",
+      "pdfUrl": "pdf/Volume13Issue4.pdf",
+      "articles": [
+        { "title": "A review of tax avoidance in China", "page": 6 },
+        { "title": "China-US trade dispute investigations and corporate earnings management strategy", "page": 18 },
+        { "title": "Official rotation and corporate innovation: evidence from the governor rotation", "page": 40 },
+        { "title": "Multiple large shareholders and corporate environmental protection investment: Evidence from the Chinese listed companies", "page": 66 },
+        { "title": "Executive compensation and conflict between shareholders and creditors: Evidence from creditor litigation", "page": 84 }
+      ]
+    },
+    {
+      "id": "v14i1", "volume": 14, "issue": 1, "year": 2021,
+      "dateLabel": "Pages 1-100 (March 2021)",
+      "pdfUrl": "pdf/Volume14Issue1.pdf",
+      "articles": [
+        { "title": "Can information confusion caused by the financing model of new economy companies be eliminated?", "page": 6 },
+        { "title": "Board faultlines and the value of cash holdings: Evidence from Chinese listed companies", "page": 29 },
+        { "title": "Family involvement, family member composition and firm innovation", "page": 47 },
+        { "title": "Does overcapacity prompt controlling shareholders to play a propping role for listed companies?", "page": 66 },
+        { "title": "Economic policy uncertainty and executive turnover", "page": 85 }
+      ]
+    },
+    {
+      "id": "v14i2", "volume": 14, "issue": 2, "year": 2021,
+      "dateLabel": "Pages 101-230 (June 2021)",
+      "pdfUrl": "pdf/Volume14Issue2.pdf",
+      "articles": [
+        { "title": "External regulation, independent director attendance, and governance effects", "page": 6 },
+        { "title": "Adjustment costs of institutional tax changes from the audit pricing perspective: Empirical evidence from the VAT reform", "page": 34 },
+        { "title": "Do goodwill impairments affect audit opinions? Evidence from China", "page": 55 },
+        { "title": "CEO organizational identification and firm cash holdings", "page": 87 },
+        { "title": "Examining export trade and corporate innovation: A multiphase difference-in-differences method", "page": 110 }
+      ]
+    },
+    {
+      "id": "v14i3", "volume": 14, "issue": 3, "year": 2021,
+      "dateLabel": "Pages 231-362 (September 2021)",
+      "pdfUrl": "pdf/Volume14Issue3.pdf",
+      "articles": [
+        { "title": "Noise from online discussion forums: Evidence from IPOs in China", "page": 6 },
+        { "title": "CFO narcissism and audit fees: Evidence from listed companies in China", "page": 31 },
+        { "title": "Board secretary and market information efficiency: Evidence from corporate site visits", "page": 49 },
+        { "title": "Waiting and following: Within-industry herding behavior in annual report disclosure", "page": 68 },
+        { "title": "Do common owners influence corporate social responsibility? Firm-level evidence from China", "page": 88 },
+        { "title": "Where to donate: The geographical distribution of corporate philanthropy in China", "page": 113 }
+      ]
+    },
+    {
+      "id": "v14i4", "volume": 14, "issue": 4, "year": 2021,
+      "dateLabel": "December 2021",
+      "pdfUrl": "pdf/Volume14Issue4.pdf",
+      "articles": [
+        { "title": "Publisher's Note", "page": 6 },
+        { "title": "Does strengthening large shareholders' cash flow rights reduce their expropriation motivation? Evidence from China's dividend tax reforms", "page": 8 },
+        { "title": "Is pledge risk matched between pledgees and pledgers in China's share pledge market?", "page": 26 },
+        { "title": "Does preventive regulation reduce stock price synchronicity? Evidence from Chinese annual report comment letters", "page": 50 },
+        { "title": "The pricing and performance of IPOs in China's poor counties", "page": 75 },
+        { "title": "The role of accounting conservatism in M&A target selection", "page": 96 },
+        { "title": "Are zombie firms more incentivized to financialize?", "page": 118 },
+        { "title": "Erratum regarding missing Declaration of Competing Interest statements in previously published articles", "page": 137 },
+        { "title": "Erratum regarding previously published articles", "page": 139 },
+        { "title": "Erratum regarding previously published articles", "page": 141 }
+      ]
+    },
+    {
+      "id": "v15i1", "volume": 15, "issue": 1, "year": 2022,
+      "dateLabel": "March 2022",
+      "pdfUrl": "pdf/Volume15Issue1.pdf",
+      "articles": [
+        { "title": "Do supply shocks in the audit partner labor market affect auditor choice? Evidence from a quasi-natural experiment", "page": 6 },
+        { "title": "Linguistic specificity and stock price synchronicity", "page": 27 },
+        { "title": "Product market competition and the disclosure of supply chain information", "page": 52 },
+        { "title": "Tax credit rating and corporate innovation decisions", "page": 74 },
+        { "title": "The impact of anti-corruption measures and risk effects on equity incentives and financial misreporting in China", "page": 95 },
+        { "title": "Stock market restrictions and corporate social responsibility: Evidence from IPO suspension in China", "page": 123 }
+      ]
+    },
+    {
+      "id": "v15i2", "volume": 15, "issue": 2, "year": 2022,
+      "dateLabel": "June 2022",
+      "pdfUrl": "pdf/Volume15Issue2.pdf",
+      "articles": [
+        { "title": "Loan loss provisions and return predictability: A dynamic perspective", "page": 6 },
+        { "title": "Thinking of peace when rich: The effect of industry growth on corporate risk-taking", "page": 26 },
+        { "title": "Administrative division adjustments and stock price comovement: Evidence from the city–county mergers in China", "page": 51 },
+        { "title": "Political governance in China's state-owned enterprises", "page": 69 },
+        { "title": "The price of carbon risk: Evidence from China's bond market", "page": 98 },
+        { "title": "Directors' and Officers' liability insurance and bond credit spreads: Evidence from China", "page": 121 },
+        { "title": "Does the social security fund help non-financial enterprises to transform from the virtual to the real?", "page": 150 },
+        { "title": "Firm internationalization and cost of equity: Evidence from China", "page": 173 }
+      ]
+    },
+    {
+      "id": "v15i3", "volume": 15, "issue": 3, "year": 2022,
+      "dateLabel": "September 2022",
+      "pdfUrl": "pdf/Volume15Issue3.pdf",
+      "articles": [
+        { "title": "Labor protection, information disclosure and analyst forecasts: Evidence from China's Labor Contract Law", "page": 6 },
+        { "title": "Stock index adjustments and analysts' forecast optimism: A quasi-natural experiment on the CSI 300 Index", "page": 29 },
+        { "title": "Market misvaluation and corporate innovation: \"Catering\" or \"risk aversion\"? — Empirical evidence from China capital market", "page": 58 },
+        { "title": "Government R&D spending, fiscal instruments and corporate technological innovation", "page": 79 },
+        { "title": "Non-actual controllers and corporate innovation: Evidence from China", "page": 111 },
+        { "title": "Do companies compare employees' salaries? Evidence from stated-owned enterprise group", "page": 136 },
+        { "title": "Standardization of the strategy translation process, procedural fairness in budgeting and firm performance", "page": 158 },
+        { "title": "Does an abnormal change in deferred tax assets interfere with analysts' earnings forecasts?", "page": 176 }
+      ]
+    },
+    {
+      "id": "v15i4", "volume": 15, "issue": 4, "year": 2022,
+      "dateLabel": "December 2022",
+      "pdfUrl": "pdf/Volume15Issue4.pdf",
+      "articles": [
+        { "title": "Implications of the \"momentum\" theory of digitalization in accounting: Evidence from Ash Cloud", "page": 6 },
+        { "title": "Does green governance affect financing constraints? Evidence from China's heavily polluting enterprises", "page": 23 },
+        { "title": "Starts and refutations of the Covid-19 rumors: Evidence from the reaction of the stock market", "page": 48 },
+        { "title": "The impact of D&O insurance on excess corporate leverage", "page": 67 },
+        { "title": "Impact of macroeconomic policy uncertainty on opportunistic insider trading", "page": 90 },
+        { "title": "Does a national industrial policy promote financial market stability? A study based on stock price crash risk", "page": 111 },
+        { "title": "Concurrent independent directors in the same industry and accounting information comparability", "page": 134 },
+        { "title": "Covering or monitoring? Independent director connectedness and corporate fraud in China", "page": 156 }
+      ]
+    }
+  ]
+}

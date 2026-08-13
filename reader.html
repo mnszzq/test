@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CJAR Reader</title>
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2EC; --paper-raised:#FFFFFF; --ink:#1C2541; --ink-soft:#5B6178;
+    --seal:#A6323A; --gold:#B08D57; --line:#E4DFD3;
+    --bar-h:52px; --serif:'Noto Serif SC',serif; --sans:'Inter','Noto Sans SC',sans-serif;
+    color-scheme: light;
+  }
+  [data-theme="dark"]{
+    --paper:#14172A; --paper-raised:#1E2237; --ink:#EDEBE3; --ink-soft:#A7ACC4;
+    --seal:#E0555E; --gold:#D9B87C; --line:#323856; color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0;}
+  body{
+    background:#2b2f24; /* neutral dark surround so page edges read clearly in both themes */
+    background:var(--ink); 
+    font-family:var(--sans); color:var(--ink); overflow:hidden;
+  }
+  button{font-family:inherit; cursor:pointer}
+  .icon-btn{
+    width:36px; height:36px; border-radius:9px; border:1px solid transparent;
+    background:transparent; color:var(--paper); display:flex; align-items:center; justify-content:center;
+    opacity:.9;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.12)}
+  .icon-btn:disabled{opacity:.3; cursor:default}
+  .icon-btn:disabled:hover{background:transparent}
+  .icon-btn svg{width:19px;height:19px}
+  .icon-btn:focus-visible{outline:2px solid var(--seal); outline-offset:1px}
+
+  /* ---------- Top toolbar ---------- */
+  #topbar{
+    position:fixed; top:0; left:0; right:0; height:var(--bar-h); z-index:50;
+    display:flex; align-items:center; gap:4px; padding:0 8px;
+    background:#1C2541; color:#F5F2EC;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  #topbar .grow{flex:1; min-width:0}
+  #issueTitle{
+    font-family:var(--serif); font-weight:700; font-size:14px; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  #issueSub{font-size:11px; opacity:.65; white-space:nowrap}
+  .sep{width:1px; height:22px; background:rgba(255,255,255,.15); margin:0 4px}
+  #pageIndicator{font-size:12.5px; white-space:nowrap; opacity:.85; font-variant-numeric:tabular-nums}
+  #pageInput{
+    width:44px; text-align:center; background:rgba(255,255,255,.08); color:#fff;
+    border:1px solid rgba(255,255,255,.2); border-radius:6px; font-size:12.5px; padding:4px 2px;
+  }
+  @media (max-width:680px){
+    #issueSub, .desktop-only{display:none}
+  }
+
+  /* ---------- Side panel ---------- */
+  #sidePanel{
+    position:fixed; top:var(--bar-h); bottom:0; left:0; width:300px; max-width:86vw;
+    background:var(--paper-raised); color:var(--ink); z-index:45;
+    transform:translateX(-100%); transition:transform .22s ease;
+    box-shadow:16px 0 40px rgba(0,0,0,.25); display:flex; flex-direction:column;
+    border-right:1px solid var(--line);
+  }
+  #sidePanel.open{transform:translateX(0)}
+  #panelTabs{display:flex; border-bottom:1px solid var(--line)}
+  #panelTabs button{
+    flex:1; padding:12px 8px; background:none; border:none; font-size:13px; font-weight:600;
+    color:var(--ink-soft); border-bottom:2px solid transparent;
+  }
+  #panelTabs button.active{color:var(--seal); border-color:var(--seal)}
+  .panel-body{flex:1; overflow-y:auto; padding:8px}
+  .toc-item{
+    display:block; width:100%; text-align:left; background:none; border:none; border-radius:8px;
+    padding:10px 10px; font-size:13px; line-height:1.4; color:var(--ink);
+  }
+  .toc-item:hover{background:var(--paper)}
+  .toc-item .n{color:var(--seal); font-weight:700; margin-right:6px}
+  .thumb-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .thumb{
+    border:2px solid transparent; border-radius:6px; overflow:hidden; cursor:pointer; background:var(--paper);
+    display:flex; align-items:center; justify-content:center; aspect-ratio:.72; position:relative;
+  }
+  .thumb.current{border-color:var(--seal)}
+  .thumb canvas{width:100%; height:100%; object-fit:contain}
+  .thumb .num{position:absolute; bottom:2px; right:4px; font-size:10px; color:var(--ink-soft); background:rgba(255,255,255,.8); padding:0 3px; border-radius:3px}
+  #panelOverlay{
+    position:fixed; inset:0; top:var(--bar-h); background:rgba(0,0,0,.35); z-index:44;
+    opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  #panelOverlay.open{opacity:1; pointer-events:auto}
+
+  /* ---------- Stage ---------- */
+  #stageWrap{position:fixed; top:var(--bar-h); left:0; right:0; bottom:0; overflow:auto; -webkit-overflow-scrolling:touch;}
+  #pageStage{min-height:100%; display:flex; align-items:center; justify-content:center; padding:18px; touch-action: pan-x pan-y;}
+  #pageCanvas{background:#fff; box-shadow:0 6px 24px rgba(0,0,0,.35); border-radius:2px}
+  #scrollStage{display:none; flex-direction:column; align-items:center; gap:14px; padding:18px 18px 60px;}
+  #scrollStage.active{display:flex}
+  #pageStage.hidden{display:none}
+  .scroll-page{background:#fff; box-shadow:0 6px 24px rgba(0,0,0,.35); position:relative;}
+  .scroll-page canvas{display:block; width:100%; height:100%}
+  .scroll-page .num-badge{position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; padding:1px 6px; border-radius:4px}
+
+  .nav-zone{
+    position:fixed; top:var(--bar-h); bottom:0; width:15%; max-width:90px; z-index:20;
+    display:flex; align-items:center; opacity:0; transition:opacity .15s;
+  }
+  #stageWrap:hover .nav-zone{opacity:1}
+  .nav-zone.left{left:0; justify-content:flex-start}
+  .nav-zone.right{right:0; justify-content:flex-end}
+  .nav-zone button{
+    margin:0 6px; width:40px; height:40px; border-radius:50%; border:none;
+    background:rgba(0,0,0,.35); color:#fff; display:flex; align-items:center; justify-content:center;
+  }
+  @media (max-width:680px){
+    .nav-zone{opacity:1; width:20%}
+    .nav-zone button{background:rgba(0,0,0,.28)}
+  }
+
+  #loading{
+    position:fixed; inset:0; background:var(--ink); color:var(--paper); z-index:60;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  }
+  #loading.hidden{display:none}
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25); border-top-color:var(--gold); animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loadingLabel{font-size:13px; opacity:.75}
+
+  #toast{
+    position:fixed; left:50%; bottom:20px; transform:translateX(-50%);
+    background:rgba(0,0,0,.8); color:#fff; padding:8px 16px; border-radius:999px; font-size:12.5px;
+    z-index:70; opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  #toast.show{opacity:1}
+
+  @media (prefers-reduced-motion: reduce){
+    #sidePanel, #panelOverlay, .nav-zone{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button class="icon-btn" id="btnPanel" title="目录 / 缩略图" aria-label="打开目录面板">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 5h14M3 10h14M3 15h10" stroke-linecap="round"/></svg>
+  </button>
+  <a class="icon-btn" href="index.html" title="返回首页" aria-label="返回首页">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10l6-6 6 6M6 9v7h8v-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="grow" style="min-width:0; margin-left:4px">
+    <div id="issueTitle">CJAR</div>
+    <div id="issueSub"></div>
+  </div>
+
+  <span id="pageIndicator" class="desktop-only"></span>
+  <input id="pageInput" type="number" min="1" value="1" aria-label="跳转到页码">
+  <span class="sep desktop-only"></span>
+
+  <button class="icon-btn desktop-only" id="btnZoomOut" title="缩小" aria-label="缩小"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4M6.5 9h5" stroke-linecap="round"/></svg></button>
+  <button class="icon-btn desktop-only" id="btnZoomIn" title="放大" aria-label="放大"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4M9 6.5v5M6.5 9h5" stroke-linecap="round"/></svg></button>
+  <button class="icon-btn desktop-only" id="btnFit" title="适应宽度/整页" aria-label="切换适应方式"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="12" height="14" rx="1.5"/></svg></button>
+  <span class="sep desktop-only"></span>
+
+  <button class="icon-btn" id="btnMode" title="切换 单页/连续滚动" aria-label="切换阅读模式"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="6" height="12" rx="1"/><rect x="11" y="4" width="6" height="12" rx="1"/></svg></button>
+  <a class="icon-btn" id="btnDownload" href="#" download title="下载 PDF" aria-label="下载 PDF"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3v10m0 0l-4-4m4 4l4-4M4 16h12" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <button class="icon-btn" id="btnTheme" title="深色模式" aria-label="切换深色模式">🌓</button>
+</div>
+
+<div id="panelOverlay"></div>
+<aside id="sidePanel">
+  <div id="panelTabs">
+    <button class="active" data-tab="toc">目录 Contents</button>
+    <button data-tab="thumbs">缩略图 Pages</button>
+  </div>
+  <div class="panel-body" id="tocBody"></div>
+  <div class="panel-body" id="thumbBody" style="display:none"></div>
+</aside>
+
+<div id="stageWrap">
+  <div id="pageStage">
+    <canvas id="pageCanvas"></canvas>
+  </div>
+  <div id="scrollStage"></div>
+</div>
+
+<div class="nav-zone left"><button id="btnPrev" aria-label="上一页"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+<div class="nav-zone right"><button id="btnNext" aria-label="下一页"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+
+<div id="loading"><div class="spinner"></div><div id="loadingLabel">正在加载 PDF…</div></div>
+<div id="toast"></div>
+
+<!-- pdf.js（Mozilla 官方库，走 CDN，无需 jQuery） -->
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+
+/* =========================================================
+   数据：优先 fetch issues.json（正式部署到服务器时用这份）
+   本地用 file:// 打开或 fetch 失败时，回退到下面内嵌的副本，
+   保证任何情况下阅读页都能独立工作。
+   ========================================================= */
+const FALLBACK_ISSUES = [
+  {"id":"v13i1","volume":13,"issue":1,"year":2020,"dateLabel":"Pages 1-128 (March 2020)","pdfUrl":"pdf/Volume13Issue1.pdf","articles":[{"title":"Of stars and galaxies – Co-authorship network and research","page":6},{"title":"State-owned enterprises in China: A review of 40 years of research and practice","page":36},{"title":"Peer effect in the initial recognition of goodwill","page":62},{"title":"The effect of affiliated analysts on stock recommendations: Evidence from share pledges in China","page":84},{"title":"How audit effort affects audit quality: An audit process and audit output perspective","page":114}]},
+  {"id":"v13i2","volume":13,"issue":2,"year":2020,"dateLabel":"Pages 129-236 (June 2020)","pdfUrl":"pdf/Volume13Issue2.pdf","articles":[{"title":"Tracing back to the source: Understanding the corporate governance of boards of directors in Chinese SOEs","page":6},{"title":"Does environmental labeling exacerbate heavily polluting firms' financial constraints? Evidence from China","page":24},{"title":"Independent technical directors and their effect on corporate innovation in China","page":52},{"title":"The impact of the Social Security Fund on auditor litigation risk","page":78},{"title":"Related party transactions and firm value: The moderating role of corporate social responsibility reporting","page":100}]},
+  {"id":"v13i3","volume":13,"issue":3,"year":2020,"dateLabel":"Pages 237-326 (September 2020)","pdfUrl":"pdf/Volume13Issue3.pdf","articles":[{"title":"Fifty years of capital markets research in accounting: Achievements so far and opportunities ahead","page":6},{"title":"Economic sharing of honors: Equal or Exclusive?","page":20},{"title":"The potential harms of goodwill impairment avoidance: Evidence based on future performance and stock prices","page":40},{"title":"Business and financial information integration and voluntary management earnings forecasts","page":60},{"title":"Job satisfaction and firm leverage: Evidence from the \"China's Best Employer Award 100\" winners","page":78}]},
+  {"id":"v13i4","volume":13,"issue":4,"year":2020,"dateLabel":"Pages 327-424 (December 2020)","pdfUrl":"pdf/Volume13Issue4.pdf","articles":[{"title":"A review of tax avoidance in China","page":6},{"title":"China-US trade dispute investigations and corporate earnings management strategy","page":18},{"title":"Official rotation and corporate innovation: evidence from the governor rotation","page":40},{"title":"Multiple large shareholders and corporate environmental protection investment: Evidence from the Chinese listed companies","page":66},{"title":"Executive compensation and conflict between shareholders and creditors: Evidence from creditor litigation","page":84}]},
+  {"id":"v14i1","volume":14,"issue":1,"year":2021,"dateLabel":"Pages 1-100 (March 2021)","pdfUrl":"pdf/Volume14Issue1.pdf","articles":[{"title":"Can information confusion caused by the financing model of new economy companies be eliminated?","page":6},{"title":"Board faultlines and the value of cash holdings: Evidence from Chinese listed companies","page":29},{"title":"Family involvement, family member composition and firm innovation","page":47},{"title":"Does overcapacity prompt controlling shareholders to play a propping role for listed companies?","page":66},{"title":"Economic policy uncertainty and executive turnover","page":85}]},
+  {"id":"v14i2","volume":14,"issue":2,"year":2021,"dateLabel":"Pages 101-230 (June 2021)","pdfUrl":"pdf/Volume14Issue2.pdf","articles":[{"title":"External regulation, independent director attendance, and governance effects","page":6},{"title":"Adjustment costs of institutional tax changes from the audit pricing perspective: Empirical evidence from the VAT reform","page":34},{"title":"Do goodwill impairments affect audit opinions? Evidence from China","page":55},{"title":"CEO organizational identification and firm cash holdings","page":87},{"title":"Examining export trade and corporate innovation: A multiphase difference-in-differences method","page":110}]},
+  {"id":"v14i3","volume":14,"issue":3,"year":2021,"dateLabel":"Pages 231-362 (September 2021)","pdfUrl":"pdf/Volume14Issue3.pdf","articles":[{"title":"Noise from online discussion forums: Evidence from IPOs in China","page":6},{"title":"CFO narcissism and audit fees: Evidence from listed companies in China","page":31},{"title":"Board secretary and market information efficiency: Evidence from corporate site visits","page":49},{"title":"Waiting and following: Within-industry herding behavior in annual report disclosure","page":68},{"title":"Do common owners influence corporate social responsibility? Firm-level evidence from China","page":88},{"title":"Where to donate: The geographical distribution of corporate philanthropy in China","page":113}]},
+  {"id":"v14i4","volume":14,"issue":4,"year":2021,"dateLabel":"December 2021","pdfUrl":"pdf/Volume14Issue4.pdf","articles":[{"title":"Publisher's Note","page":6},{"title":"Does strengthening large shareholders' cash flow rights reduce their expropriation motivation? Evidence from China's dividend tax reforms","page":8},{"title":"Is pledge risk matched between pledgees and pledgers in China's share pledge market?","page":26},{"title":"Does preventive regulation reduce stock price synchronicity? Evidence from Chinese annual report comment letters","page":50},{"title":"The pricing and performance of IPOs in China's poor counties","page":75},{"title":"The role of accounting conservatism in M&A target selection","page":96},{"title":"Are zombie firms more incentivized to financialize?","page":118},{"title":"Erratum regarding missing Declaration of Competing Interest statements in previously published articles","page":137},{"title":"Erratum regarding previously published articles","page":139},{"title":"Erratum regarding previously published articles","page":141}]},
+  {"id":"v15i1","volume":15,"issue":1,"year":2022,"dateLabel":"March 2022","pdfUrl":"pdf/Volume15Issue1.pdf","articles":[{"title":"Do supply shocks in the audit partner labor market affect auditor choice? Evidence from a quasi-natural experiment","page":6},{"title":"Linguistic specificity and stock price synchronicity","page":27},{"title":"Product market competition and the disclosure of supply chain information","page":52},{"title":"Tax credit rating and corporate innovation decisions","page":74},{"title":"The impact of anti-corruption measures and risk effects on equity incentives and financial misreporting in China","page":95},{"title":"Stock market restrictions and corporate social responsibility: Evidence from IPO suspension in China","page":123}]},
+  {"id":"v15i2","volume":15,"issue":2,"year":2022,"dateLabel":"June 2022","pdfUrl":"pdf/Volume15Issue2.pdf","articles":[{"title":"Loan loss provisions and return predictability: A dynamic perspective","page":6},{"title":"Thinking of peace when rich: The effect of industry growth on corporate risk-taking","page":26},{"title":"Administrative division adjustments and stock price comovement: Evidence from the city–county mergers in China","page":51},{"title":"Political governance in China's state-owned enterprises","page":69},{"title":"The price of carbon risk: Evidence from China's bond market","page":98},{"title":"Directors' and Officers' liability insurance and bond credit spreads: Evidence from China","page":121},{"title":"Does the social security fund help non-financial enterprises to transform from the virtual to the real?","page":150},{"title":"Firm internationalization and cost of equity: Evidence from China","page":173}]},
+  {"id":"v15i3","volume":15,"issue":3,"year":2022,"dateLabel":"September 2022","pdfUrl":"pdf/Volume15Issue3.pdf","articles":[{"title":"Labor protection, information disclosure and analyst forecasts: Evidence from China's Labor Contract Law","page":6},{"title":"Stock index adjustments and analysts' forecast optimism: A quasi-natural experiment on the CSI 300 Index","page":29},{"title":"Market misvaluation and corporate innovation: \"Catering\" or \"risk aversion\"? — Empirical evidence from China capital market","page":58},{"title":"Government R&D spending, fiscal instruments and corporate technological innovation","page":79},{"title":"Non-actual controllers and corporate innovation: Evidence from China","page":111},{"title":"Do companies compare employees' salaries? Evidence from stated-owned enterprise group","page":136},{"title":"Standardization of the strategy translation process, procedural fairness in budgeting and firm performance","page":158},{"title":"Does an abnormal change in deferred tax assets interfere with analysts' earnings forecasts?","page":176}]},
+  {"id":"v15i4","volume":15,"issue":4,"year":2022,"dateLabel":"December 2022","pdfUrl":"pdf/Volume15Issue4.pdf","articles":[{"title":"Implications of the \"momentum\" theory of digitalization in accounting: Evidence from Ash Cloud","page":6},{"title":"Does green governance affect financing constraints? Evidence from China's heavily polluting enterprises","page":23},{"title":"Starts and refutations of the Covid-19 rumors: Evidence from the reaction of the stock market","page":48},{"title":"The impact of D&O insurance on excess corporate leverage","page":67},{"title":"Impact of macroeconomic policy uncertainty on opportunistic insider trading","page":90},{"title":"Does a national industrial policy promote financial market stability? A study based on stock price crash risk","page":111},{"title":"Concurrent independent directors in the same industry and accounting information comparability","page":134},{"title":"Covering or monitoring? Independent director connectedness and corporate fraud in China","page":156}]}
+];
+const SAMPLE_PDF = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'; // 找不到真实 PDF 时的占位演示文件
+
+async function loadIssues(){
+  try{
+    const res = await fetch('issues.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('http '+res.status);
+    const data = await res.json();
+    if(Array.isArray(data.issues) && data.issues.length) return data.issues;
+    throw new Error('empty issues.json');
+  }catch(e){
+    return FALLBACK_ISSUES; // file:// 本地打开，或 issues.json 还没部署时的兜底
+  }
+}
+
+/* ========================= 状态 ========================= */
+const $ = (s) => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+let issue = null;
+let pdfDoc = null;
+let currentPage = Math.max(1, parseInt(params.get('page')) || 1);
+let totalPages = 0;
+let scale = 1;
+let fitMode = 'width'; // 'width' | 'page'
+let mode = 'page'; // 'page' | 'scroll'
+let renderTask = null;
+let scrollObserver = null;
+let thumbObserver = null;
+
+const els = {
+  loading: $('#loading'), loadingLabel: $('#loadingLabel'),
+  issueTitle: $('#issueTitle'), issueSub: $('#issueSub'),
+  pageIndicator: $('#pageIndicator'), pageInput: $('#pageInput'),
+  stageWrap: $('#stageWrap'), pageStage: $('#pageStage'), pageCanvas: $('#pageCanvas'),
+  scrollStage: $('#scrollStage'),
+  btnPrev: $('#btnPrev'), btnNext: $('#btnNext'),
+  btnZoomIn: $('#btnZoomIn'), btnZoomOut: $('#btnZoomOut'), btnFit: $('#btnFit'),
+  btnMode: $('#btnMode'), btnPanel: $('#btnPanel'), btnTheme: $('#btnTheme'), btnDownload: $('#btnDownload'),
+  sidePanel: $('#sidePanel'), panelOverlay: $('#panelOverlay'),
+  tocBody: $('#tocBody'), thumbBody: $('#thumbBody'),
+  toast: $('#toast'),
+};
+
+function showToast(msg){
+  els.toast.textContent = msg;
+  els.toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => els.toast.classList.remove('show'), 2600);
+}
+
+function setLoading(on, label){
+  els.loading.classList.toggle('hidden', !on);
+  if(label) els.loadingLabel.textContent = label;
+}
+
+/* ========================= 初始化 ========================= */
+(async function init(){
+  const issues = await loadIssues();
+  const id = params.get('id');
+  issue = issues.find(i => i.id === id) || issues[0];
+
+  els.issueTitle.textContent = `Volume ${issue.volume}, Issue ${issue.issue}`;
+  els.issueSub.textContent = issue.dateLabel;
+  els.btnDownload.href = issue.pdfUrl;
+  document.title = `Volume ${issue.volume} Issue ${issue.issue} · CJAR`;
+
+  buildTOC(issue.articles);
+
+  let url = issue.pdfUrl;
+  try{
+    pdfDoc = await pdfjsLib.getDocument(url).promise;
+  }catch(e){
+    showToast('未找到该期 PDF，已加载示例文件用于演示界面');
+    url = SAMPLE_PDF;
+    pdfDoc = await pdfjsLib.getDocument(url).promise;
+  }
+
+  totalPages = pdfDoc.numPages;
+  els.pageInput.max = totalPages;
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  setLoading(false);
+  await computeFitScale();
+  await renderPageMode();
+  updatePageIndicator();
+})();
+
+/* ========================= 单页模式渲染 ========================= */
+async function computeFitScale(){
+  const page = await pdfDoc.getPage(currentPage);
+  const unscaled = page.getViewport({scale:1});
+  const cw = els.stageWrap.clientWidth - 36;
+  const ch = els.stageWrap.clientHeight - 36;
+  if(fitMode === 'width'){
+    scale = cw / unscaled.width;
+  }else{
+    scale = Math.min(cw / unscaled.width, ch / unscaled.height);
+  }
+  scale = Math.max(0.25, Math.min(scale, 4));
+}
+
+async function renderPageMode(){
+  if(renderTask){ try{ renderTask.cancel(); }catch(e){} }
+  const page = await pdfDoc.getPage(currentPage);
+  const outputScale = window.devicePixelRatio || 1;
+  const viewport = page.getViewport({scale});
+  const canvas = els.pageCanvas;
+  canvas.width = Math.floor(viewport.width * outputScale);
+  canvas.height = Math.floor(viewport.height * outputScale);
+  canvas.style.width = Math.floor(viewport.width) + 'px';
+  canvas.style.height = Math.floor(viewport.height) + 'px';
+  const ctx = canvas.getContext('2d');
+  const transform = outputScale !== 1 ? [outputScale,0,0,outputScale,0,0] : null;
+  renderTask = page.render({canvasContext: ctx, viewport, transform});
+  try{ await renderTask.promise; }catch(e){ /* cancelled render, ignore */ }
+  preloadNeighbors();
+}
+
+const pageCache = new Map(); // page number -> pre-rendered <canvas> (used for instant swipe feel, page mode only)
+async function preloadNeighbors(){
+  [currentPage-1, currentPage+1].forEach(async (n) => {
+    if(n < 1 || n > totalPages || pageCache.has(n)) return;
+    try{
+      const page = await pdfDoc.getPage(n);
+      const viewport = page.getViewport({scale});
+      const off = document.createElement('canvas');
+      off.width = viewport.width; off.height = viewport.height;
+      await page.render({canvasContext: off.getContext('2d'), viewport}).promise;
+      pageCache.set(n, off);
+    }catch(e){}
+  });
+}
+
+function updatePageIndicator(){
+  els.pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+  els.pageInput.value = currentPage;
+  els.btnPrev.parentElement.style.visibility = currentPage <= 1 ? 'hidden' : 'visible';
+  els.btnNext.parentElement.style.visibility = currentPage >= totalPages ? 'hidden' : 'visible';
+  history.replaceState(null, '', `?id=${issue.id}&page=${currentPage}`);
+  document.querySelectorAll('.thumb').forEach(t => t.classList.toggle('current', +t.dataset.page === currentPage));
+}
+
+async function goToPage(n){
+  n = Math.min(Math.max(1, n), totalPages);
+  if(n === currentPage && mode==='page') return;
+  currentPage = n;
+  if(mode === 'page'){
+    if(pageCache.has(n)){
+      const off = pageCache.get(n);
+      els.pageCanvas.width = off.width; els.pageCanvas.height = off.height;
+      els.pageCanvas.style.width = (off.width / (window.devicePixelRatio||1)) + 'px';
+      els.pageCanvas.style.height = (off.height / (window.devicePixelRatio||1)) + 'px';
+      els.pageCanvas.getContext('2d').drawImage(off, 0, 0);
+      preloadNeighbors();
+    }else{
+      await renderPageMode();
+    }
+  }else{
+    const target = els.scrollStage.querySelector(`[data-page="${n}"]`);
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  updatePageIndicator();
+}
+
+/* ========================= 连续滚动模式 ========================= */
+async function buildScrollStage(){
+  if(els.scrollStage.childElementCount) return; // 已构建过
+  const first = await pdfDoc.getPage(1);
+  const ratio = first.getViewport({scale:1}).height / first.getViewport({scale:1}).width;
+  const cw = Math.min(els.stageWrap.clientWidth - 36, 900);
+
+  const frag = document.createDocumentFragment();
+  for(let n=1; n<=totalPages; n++){
+    const wrap = document.createElement('div');
+    wrap.className = 'scroll-page';
+    wrap.dataset.page = n;
+    wrap.style.width = cw + 'px';
+    wrap.style.height = Math.round(cw * ratio) + 'px';
+    wrap.innerHTML = `<div class="num-badge">${n} / ${totalPages}</div>`;
+    frag.appendChild(wrap);
+  }
+  els.scrollStage.appendChild(frag);
+
+  scrollObserver = new IntersectionObserver(async (entries) => {
+    for(const entry of entries){
+      if(!entry.isIntersecting) continue;
+      const wrap = entry.target;
+      const n = +wrap.dataset.page;
+      if(wrap.querySelector('canvas')) continue;
+      const page = await pdfDoc.getPage(n);
+      const vp = page.getViewport({scale: cw / page.getViewport({scale:1}).width});
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      wrap.prepend(canvas);
+      page.render({canvasContext: canvas.getContext('2d'), viewport: vp});
+    }
+  }, { root: els.stageWrap, rootMargin: '800px 0px' });
+
+  els.scrollStage.querySelectorAll('.scroll-page').forEach(w => scrollObserver.observe(w));
+
+  // 滚动时更新当前页码指示（用可视区域中点最近的那一页）
+  els.stageWrap.addEventListener('scroll', debounce(() => {
+    if(mode !== 'scroll') return;
+    const mid = els.stageWrap.scrollTop + els.stageWrap.clientHeight/2;
+    let best = 1, bestDist = Infinity;
+    els.scrollStage.querySelectorAll('.scroll-page').forEach(w => {
+      const d = Math.abs((w.offsetTop + w.offsetHeight/2) - mid);
+      if(d < bestDist){ bestDist = d; best = +w.dataset.page; }
+    });
+    currentPage = best;
+    updatePageIndicator();
+  }, 120));
+}
+
+function debounce(fn, wait){
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); };
+}
+
+/* ========================= 模式切换 ========================= */
+async function setMode(next){
+  mode = next;
+  els.pageStage.classList.toggle('hidden', mode !== 'page');
+  els.scrollStage.classList.toggle('active', mode === 'scroll');
+  $('.desktop-only#btnZoomIn'); // no-op guard
+  if(mode === 'scroll'){
+    setLoading(true, '正在构建连续阅读视图…');
+    await buildScrollStage();
+    setLoading(false);
+    const target = els.scrollStage.querySelector(`[data-page="${currentPage}"]`);
+    if(target) target.scrollIntoView({block:'start'});
+  }else{
+    await computeFitScale();
+    await renderPageMode();
+  }
+}
+
+/* ========================= 目录 / 缩略图 面板 ========================= */
+function buildTOC(articles){
+  els.tocBody.innerHTML = articles.map((a, i) => `
+    <button class="toc-item" data-page="${a.page}"><span class="n">${i+1}.</span>${escapeHtml(a.title)}</button>
+  `).join('');
+  els.tocBody.querySelectorAll('.toc-item').forEach(btn => {
+    btn.addEventListener('click', () => { goToPage(+btn.dataset.page); closePanel(); });
+  });
+}
+
+async function buildThumbs(){
+  if(els.thumbBody.childElementCount) return;
+  const frag = document.createDocumentFragment();
+  for(let n=1; n<=totalPages; n++){
+    const cell = document.createElement('div');
+    cell.className = 'thumb'; cell.dataset.page = n;
+    cell.innerHTML = `<span class="num">${n}</span>`;
+    cell.addEventListener('click', () => { goToPage(n); closePanel(); });
+    frag.appendChild(cell);
+  }
+  els.thumbBody.innerHTML = '<div class="thumb-grid"></div>';
+  els.thumbBody.querySelector('.thumb-grid').appendChild(frag);
+
+  thumbObserver = new IntersectionObserver(async (entries) => {
+    for(const entry of entries){
+      if(!entry.isIntersecting) continue;
+      const cell = entry.target;
+      if(cell.querySelector('canvas')) continue;
+      const n = +cell.dataset.page;
+      const page = await pdfDoc.getPage(n);
+      const vp = page.getViewport({scale: 120 / page.getViewport({scale:1}).width});
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      cell.prepend(canvas);
+      page.render({canvasContext: canvas.getContext('2d'), viewport: vp});
+      thumbObserver.unobserve(cell);
+    }
+  }, { root: els.thumbBody, rootMargin: '300px 0px' });
+
+  els.thumbBody.querySelectorAll('.thumb').forEach(c => thumbObserver.observe(c));
+}
+
+function openPanel(){ els.sidePanel.classList.add('open'); els.panelOverlay.classList.add('open'); }
+function closePanel(){ els.sidePanel.classList.remove('open'); els.panelOverlay.classList.remove('open'); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ========================= 事件绑定 ========================= */
+els.btnPanel.addEventListener('click', () => els.sidePanel.classList.contains('open') ? closePanel() : openPanel());
+els.panelOverlay.addEventListener('click', closePanel);
+document.querySelectorAll('#panelTabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#panelTabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    els.tocBody.style.display = tab === 'toc' ? 'block' : 'none';
+    els.thumbBody.style.display = tab === 'thumbs' ? 'block' : 'none';
+    if(tab === 'thumbs') buildThumbs();
+  });
+});
+
+els.btnPrev.addEventListener('click', () => goToPage(currentPage - 1));
+els.btnNext.addEventListener('click', () => goToPage(currentPage + 1));
+els.pageInput.addEventListener('change', () => goToPage(+els.pageInput.value || 1));
+
+els.btnZoomIn.addEventListener('click', async () => { scale = Math.min(scale + 0.25, 4); await renderPageMode(); });
+els.btnZoomOut.addEventListener('click', async () => { scale = Math.max(scale - 0.25, 0.25); await renderPageMode(); });
+els.btnFit.addEventListener('click', async () => { fitMode = fitMode === 'width' ? 'page' : 'width'; await computeFitScale(); await renderPageMode(); });
+
+els.btnMode.addEventListener('click', () => setMode(mode === 'page' ? 'scroll' : 'page'));
+
+els.btnDownload.addEventListener('click', () => showToast('开始下载 PDF…'));
+
+const root = document.documentElement;
+const storedTheme = localStorage.getItem('cjar-theme');
+if(storedTheme === 'dark' || (!storedTheme && matchMedia('(prefers-color-scheme: dark)').matches)) root.setAttribute('data-theme','dark');
+els.btnTheme.addEventListener('click', () => {
+  const isDark = root.getAttribute('data-theme') === 'dark';
+  if(isDark){ root.removeAttribute('data-theme'); localStorage.setItem('cjar-theme','light'); }
+  else{ root.setAttribute('data-theme','dark'); localStorage.setItem('cjar-theme','dark'); }
+});
+
+/* 键盘导航 */
+document.addEventListener('keydown', (e) => {
+  if(document.activeElement === els.pageInput) return;
+  if(e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(currentPage + 1);
+  else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToPage(currentPage - 1);
+  else if(e.key === 'Escape') closePanel();
+  else if(e.key === '+') { scale = Math.min(scale+0.25,4); renderPageMode(); }
+  else if(e.key === '-') { scale = Math.max(scale-0.25,0.25); renderPageMode(); }
+});
+
+/* 滑动翻页（仅单页模式 + 未放大时启用，放大后交给原生滚动平移） */
+let touchStartX = 0, touchStartY = 0, touchActive = false;
+els.pageStage.addEventListener('pointerdown', (e) => {
+  if(e.pointerType === 'mouse') return;
+  touchStartX = e.clientX; touchStartY = e.clientY; touchActive = true;
+}, {passive:true});
+els.pageStage.addEventListener('pointerup', (e) => {
+  if(!touchActive) return;
+  touchActive = false;
+  const dx = e.clientX - touchStartX, dy = e.clientY - touchStartY;
+  if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5){
+    if(dx < 0) goToPage(currentPage + 1); else goToPage(currentPage - 1);
+  }
+}, {passive:true});
+
+/* 双指缩放（单页模式） */
+let pinchStartDist = 0, pinchStartScale = 1;
+els.pageStage.addEventListener('touchstart', (e) => {
+  if(e.touches.length === 2){
+    pinchStartDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    pinchStartScale = scale;
+  }
+}, {passive:true});
+els.pageStage.addEventListener('touchmove', (e) => {
+  if(e.touches.length === 2 && pinchStartDist){
+    const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    const next = Math.max(0.25, Math.min(4, pinchStartScale * (dist / pinchStartDist)));
+    els.pageCanvas.style.width = (parseFloat(els.pageCanvas.style.width) * (next/scale)) + 'px';
+    els.pageCanvas.style.height = (parseFloat(els.pageCanvas.style.height) * (next/scale)) + 'px';
+    scale = next;
+  }
+}, {passive:true});
+els.pageStage.addEventListener('touchend', (e) => {
+  if(e.touches.length < 2 && pinchStartDist){ pinchStartDist = 0; renderPageMode(); }
+});
+
+/* 窗口尺寸变化：单页模式下按 fitMode 重新计算缩放 */
+window.addEventListener('resize', debounce(async () => {
+  if(mode === 'page'){ await computeFitScale(); await renderPageMode(); }
+}, 200));
+
+/* PWA：注册 service worker（离线缓存已读过的期刊） */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

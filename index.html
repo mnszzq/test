@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>China Journal of Accounting Research · CJAR</title>
+<meta name="description" content="China Journal of Accounting Research (CJAR) — 历年卷期在线阅读。">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C2541">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2EC; --paper-raised:#FFFFFF; --ink:#1C2541; --ink-soft:#5B6178;
+    --seal:#A6323A; --gold:#B08D57; --line:#E4DFD3;
+    --radius:14px; --shadow: 0 1px 2px rgba(28,37,65,.04), 0 8px 24px -12px rgba(28,37,65,.18);
+    --serif: 'Noto Serif SC', 'Source Serif 4', serif;
+    --sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#161A2C; --paper-raised:#1F2438; --ink:#EDEBE3; --ink-soft:#A7ACC4;
+    --seal:#E0555E; --gold:#D9B87C; --line:#323856;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased; transition:background .25s ease, color .25s ease;}
+  a{color:inherit}
+
+  .topbar{
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:14px;
+    padding:14px clamp(16px,4vw,48px);
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:17px; letter-spacing:.2px; white-space:nowrap; text-decoration:none;}
+  .brand .mark{width:30px;height:30px;border-radius:50%; background:var(--seal); color:#fff; display:flex;align-items:center;justify-content:center; font-family:var(--serif); font-weight:900; font-size:13px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35);}
+  .topbar-spacer{flex:1}
+  .search-wrap{position:relative; width:min(320px, 40vw);}
+  .search-wrap input{width:100%; padding:8px 12px 8px 34px; border-radius:999px; border:1px solid var(--line); background:var(--paper-raised); color:var(--ink); font-family:var(--sans); font-size:14px; outline:none;}
+  .search-wrap input:focus{border-color:var(--seal)}
+  .search-wrap svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); opacity:.5; width:15px;height:15px}
+  .theme-toggle{border:1px solid var(--line); background:var(--paper-raised); color:var(--ink); border-radius:999px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px;}
+  .theme-toggle:focus-visible, .search-wrap input:focus-visible, a:focus-visible, button:focus-visible{outline:2px solid var(--seal); outline-offset:2px;}
+
+  .hero{padding:clamp(40px,7vw,88px) clamp(16px,4vw,48px) clamp(28px,4vw,48px); max-width:1180px; margin:0 auto;}
+  .hero .eyebrow{font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:14px; display:block;}
+  .hero h1{font-family:var(--serif); font-weight:900; font-size:clamp(30px, 5vw, 54px); line-height:1.12; margin:0 0 18px; letter-spacing:-.01em;}
+  .hero p{font-size:clamp(14.5px,1.6vw,17px); color:var(--ink-soft); max-width:640px; line-height:1.7; margin:0;}
+  .hero-links{margin-top:26px; display:flex; gap:22px; flex-wrap:wrap; font-size:13.5px;}
+  .hero-links a{text-decoration:none; padding-bottom:2px; border-bottom:1px solid var(--line); color:var(--ink-soft); transition:color .15s, border-color .15s;}
+  .hero-links a:hover{color:var(--seal); border-color:var(--seal)}
+
+  .content{max-width:1180px; margin:0 auto; padding:0 clamp(16px,4vw,48px) 80px;}
+  .year-row{display:flex; align-items:baseline; gap:16px; margin:52px 0 20px; padding-top:6px;}
+  .year-row h2{font-family:var(--serif); font-weight:700; font-size:clamp(22px,3vw,30px); margin:0;}
+  .year-row .count{color:var(--ink-soft); font-size:13px}
+  .year-row .rule{flex:1; height:1px; background:var(--line)}
+
+  .grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));}
+  .card{display:flex; flex-direction:column; gap:14px; background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); text-decoration:none; color:var(--ink); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;}
+  .card:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--seal) 40%, var(--line));}
+  .card-top{display:flex; align-items:flex-start; gap:12px}
+  .seal-badge{flex:0 0 auto; width:52px; height:52px; border-radius:50%; border:2px solid var(--seal); color:var(--seal); display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--serif); line-height:1; transform:rotate(-4deg);}
+  .seal-badge .v{font-size:9px; letter-spacing:.06em; opacity:.85}
+  .seal-badge .n{font-size:17px; font-weight:900}
+  .card-title{font-family:var(--serif); font-weight:700; font-size:15px; line-height:1.35;}
+  .card-meta{font-size:12.5px; color:var(--ink-soft)}
+  .card-cta{margin-top:auto; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--seal);}
+  .card-cta svg{width:13px;height:13px; transition:transform .15s}
+  .card:hover .card-cta svg{transform:translateX(3px)}
+
+  .empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:14px; display:none;}
+  .skeleton{text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:13px;}
+
+  footer{border-top:1px solid var(--line); padding:28px clamp(16px,4vw,48px); text-align:center; font-size:12.5px; color:var(--ink-soft);}
+
+  @media (max-width:640px){
+    .search-wrap{width:min(180px, 46vw)}
+    .brand span.full{display:none}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="CJAR 首页">
+    <span class="mark">CJ</span>
+    <span class="full">China Journal of&nbsp;Accounting&nbsp;Research</span>
+  </a>
+  <div class="topbar-spacer"></div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="6.2"/><path d="M14 14l4 4" stroke-linecap="round"/></svg>
+    <input id="searchInput" type="search" placeholder="搜索卷期 / Search issue…" aria-label="搜索卷期">
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式" title="切换深色模式">🌓</button>
+</header>
+
+<section class="hero" id="top">
+  <span class="eyebrow">Peer-reviewed · Since 2008</span>
+  <h1>China Journal of<br>Accounting Research</h1>
+  <p>历年各卷期在线阅读，点击卡片进入统一阅读器（支持单页翻阅 / 连续滚动两种模式，手机可双指缩放）。</p>
+  <nav class="hero-links">
+    <a href="https://www.sciencedirect.com/journal/china-journal-of-accounting-research/about/aims-and-scope">Aims &amp; scope</a>
+    <a href="https://www.sciencedirect.com/journal/china-journal-of-accounting-research/about/editorial-board">Editorial board</a>
+    <a href="https://www.sciencedirect.com/journal/china-journal-of-accounting-research/about/abstracting-and-indexing">Abstracting &amp; indexing</a>
+    <a href="https://www.editorialmanager.com/CJARR/default.aspx">Submit your article</a>
+    <a href="https://www.elsevier.com/journals/china-journal-of-accounting-research/1755-3091/guide-for-authors">Guide for authors</a>
+  </nav>
+</section>
+
+<main class="content" id="issueContainer" aria-live="polite">
+  <p class="skeleton" id="skeleton">加载卷期列表…</p>
+</main>
+<p class="empty-state" id="emptyState">没有找到匹配的卷期 / No matching issue.</p>
+
+<footer>
+  <p>Copyright © China Journal of Accounting Research · Production and hosting by Elsevier B.V.</p>
+</footer>
+
+<script>
+/* 与 reader.html 完全同一套数据策略：优先 fetch issues.json（部署到服务器后维护一份数据即可），
+   fetch 失败（比如用 file:// 直接双击打开）时回退到内嵌副本，保证首页始终可用。 */
+const FALLBACK_ISSUES = [
+  {"id":"v13i1","volume":13,"issue":1,"year":2020,"dateLabel":"Pages 1-128 · March 2020","articles":5},
+  {"id":"v13i2","volume":13,"issue":2,"year":2020,"dateLabel":"Pages 129-236 · June 2020","articles":5},
+  {"id":"v13i3","volume":13,"issue":3,"year":2020,"dateLabel":"Pages 237-326 · September 2020","articles":5},
+  {"id":"v13i4","volume":13,"issue":4,"year":2020,"dateLabel":"Pages 327-424 · December 2020","articles":5},
+  {"id":"v14i1","volume":14,"issue":1,"year":2021,"dateLabel":"Pages 1-100 · March 2021","articles":5},
+  {"id":"v14i2","volume":14,"issue":2,"year":2021,"dateLabel":"Pages 101-230 · June 2021","articles":5},
+  {"id":"v14i3","volume":14,"issue":3,"year":2021,"dateLabel":"Pages 231-362 · September 2021","articles":6},
+  {"id":"v14i4","volume":14,"issue":4,"year":2021,"dateLabel":"December 2021","articles":10},
+  {"id":"v15i1","volume":15,"issue":1,"year":2022,"dateLabel":"March 2022","articles":6},
+  {"id":"v15i2","volume":15,"issue":2,"year":2022,"dateLabel":"June 2022","articles":8},
+  {"id":"v15i3","volume":15,"issue":3,"year":2022,"dateLabel":"September 2022","articles":8},
+  {"id":"v15i4","volume":15,"issue":4,"year":2022,"dateLabel":"December 2022","articles":8}
+];
+
+async function loadIssues(){
+  try{
+    const res = await fetch('issues.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('http '+res.status);
+    const data = await res.json();
+    if(!Array.isArray(data.issues) || !data.issues.length) throw new Error('empty');
+    return data.issues.map(it => ({ ...it, articles: it.articles.length }));
+  }catch(e){
+    return FALLBACK_ISSUES;
+  }
+}
+
+const container = document.getElementById('issueContainer');
+const emptyState = document.getElementById('emptyState');
+let ISSUES = [];
+
+function render(filterText){
+  const q = (filterText || '').trim().toLowerCase();
+  const byYear = {};
+  ISSUES.forEach(it => {
+    const label = `volume ${it.volume} issue ${it.issue} ${it.dateLabel}`.toLowerCase();
+    if (q && !label.includes(q)) return;
+    (byYear[it.year] ||= []).push(it);
+  });
+
+  const years = Object.keys(byYear).sort((a,b) => b - a);
+  container.innerHTML = '';
+
+  years.forEach(year => {
+    const items = byYear[year];
+    const section = document.createElement('section');
+    section.innerHTML = `
+      <div class="year-row">
+        <h2>${year}</h2>
+        <span class="count">${items.length} issue${items.length>1?'s':''}</span>
+        <span class="rule"></span>
+      </div>
+      <div class="grid">
+        ${items.map(it => `
+          <a class="card" href="reader.html?id=${it.id}">
+            <div class="card-top">
+              <div class="seal-badge"><span class="v">VOL</span><span class="n">${it.volume}·${it.issue}</span></div>
+              <div>
+                <div class="card-title">Volume ${it.volume}, Issue ${it.issue}</div>
+                <div class="card-meta">${it.dateLabel}</div>
+              </div>
+            </div>
+            <div class="card-meta">${it.articles} articles</div>
+            <span class="card-cta">阅读 Read
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(section);
+  });
+
+  emptyState.style.display = years.length ? 'none' : 'block';
+}
+
+(async function init(){
+  ISSUES = await loadIssues();
+  render('');
+})();
+
+document.getElementById('searchInput').addEventListener('input', e => render(e.target.value));
+
+const root = document.documentElement;
+const toggle = document.getElementById('themeToggle');
+const stored = localStorage.getItem('cjar-theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+if (stored === 'dark' || (!stored && prefersDark)) root.setAttribute('data-theme', 'dark');
+toggle.addEventListener('click', () => {
+  const isDark = root.getAttribute('data-theme') === 'dark';
+  if (isDark) { root.removeAttribute('data-theme'); localStorage.setItem('cjar-theme','light'); }
+  else { root.setAttribute('data-theme','dark'); localStorage.setItem('cjar-theme','dark'); }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
